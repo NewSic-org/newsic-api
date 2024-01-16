@@ -1,0 +1,14 @@
+{
+    "builds":[
+    {
+        "src": "api/newsic-api.py",
+        "use": "@vercel/python"
+    }
+],
+    "routes":[
+    {
+        "src": "/(.*)",
+        "dest": "/api/newsic-api.py" 
+    }
+]
+}
