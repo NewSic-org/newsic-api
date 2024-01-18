@@ -8,7 +8,7 @@ from pinecone import Pinecone
 from openai import OpenAI
 
 app = Flask(__name__)
-CORS(app, )
+CORS(app, resources={r"/*": {"origins": "https://newsic-frontend.vercel.app", "methods": ["GET", "POST", "OPTIONS"]}})
 
 env_path = pathlib.Path('..') / '.local.env'
 load_dotenv(dotenv_path=env_path)
