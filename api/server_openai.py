@@ -5,21 +5,26 @@ import os
 from openai import OpenAI
 from flask_cors import CORS
 from pymongo import MongoClient
+from pinecone import Pinecone
 
 app = Flask(__name__)
 CORS(app)
 
-env_path = pathlib.Path('.') / '.local.env'
+env_path = pathlib.Path('..') / '.local.env'
 load_dotenv(dotenv_path=env_path)
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 MONGO_DB_URI = os.getenv('MONGO_DB_URI')
+pinecone_key = os.getenv('PINECONE_DB')
 
 #Database connection
 client = OpenAI(api_key=OPENAI_API_KEY)
 client_db = MongoClient(MONGO_DB_URI)
 db = client_db.get_database('newsic')
 records = db.articles
+pc = Pinecone(api_key = pinecone_key)
+index = pc.Index("newsic")
+
 
 @app.route('/process-title', methods=['POST'])
 def process_title():
@@ -60,8 +65,45 @@ def generate_content_with_openai(summary, art_title):
         'song_title': song_title
     }
     records.insert_one(new_song)
+
+    response_emb = client.embeddings.create(
+    input = art_title,
+    model = "text-embedding-ada-002"
+    )
+    vec_data = {}
+    vec_data[art_title] = response_emb.data[0].embedding
+    records_emb = [{"id": key, "values": value} for key, value in vec_data.items()]
+    index.upsert(
+          vectors=records_emb
+    )
+
+
     return jsonify({'title': song_title, 'generatedContent': content})
 
+@app.route('/semantic-search', methods=['POST'])
+def semantic_search():
+    data = request.get_json()
+    search = data.get('search', '')
+    print (search)
+#   search_headline = input("Enter your headline: ")
+    response2 = client.embeddings.create(
+      input = search,
+      model = "text-embedding-ada-002"
+  )
 
+    doc = index.query(
+        vector=response2.data[0].embedding,
+        top_k = 3
+  )
+    ids = [match['id'] for match in doc['matches']]
+    # print(ids)
+
+    articles = []
+    for title in ids:
+        article = records.find_one({'art_title': title}, {'_id': 0})
+        if article:
+            articles.append(article)
+    return jsonify(articles)
+    
 if __name__ == '__main__':
     app.run()
