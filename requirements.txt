@@ -6,3 +6,4 @@ protobuf==4.25.2
 pymongo==4.6.1
 python-dotenv==1.0.0
 Werkzeug==2.2.2
+pinecone-client
