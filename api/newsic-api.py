@@ -8,7 +8,7 @@ from pinecone import Pinecone
 from openai import OpenAI
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "https://newsic-frontend.vercel.app"}})
 
 env_path = pathlib.Path('..') / '.local.env'
 load_dotenv(dotenv_path=env_path)
@@ -65,6 +65,14 @@ def semantic_search():
         if article:
             articles.append(article)
     return jsonify(articles)
+
+@app.route('/semantic-search', methods=['OPTIONS'])
+def handle_preflight():
+    response = jsonify()
+    response.headers.add('Access-Control-Allow-Origin', 'https://newsic-frontend.vercel.app')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Methods', 'POST')
+    return response
 
 if __name__ == '__main__':
     app.run()
