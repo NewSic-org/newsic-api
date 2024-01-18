@@ -79,31 +79,6 @@ def generate_content_with_openai(summary, art_title):
 
 
     return jsonify({'title': song_title, 'generatedContent': content})
-
-@app.route('/semantic-search', methods=['POST'])
-def semantic_search():
-    data = request.get_json()
-    search = data.get('search', '')
-    print (search)
-#   search_headline = input("Enter your headline: ")
-    response2 = client.embeddings.create(
-      input = search,
-      model = "text-embedding-ada-002"
-  )
-
-    doc = index.query(
-        vector=response2.data[0].embedding,
-        top_k = 3
-  )
-    ids = [match['id'] for match in doc['matches']]
-    # print(ids)
-
-    articles = []
-    for title in ids:
-        article = records.find_one({'art_title': title}, {'_id': 0})
-        if article:
-            articles.append(article)
-    return jsonify(articles)
     
 if __name__ == '__main__':
     app.run()
