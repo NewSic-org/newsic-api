@@ -34,7 +34,7 @@ def get_data():
         articles_list = list(articles)
         response = jsonify(articles_list)
     
-    response.headers.add('Access-Control-Allow-Origin', 'https://newsic-frontend.vercel.app')
+    response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
     response.headers.add('Access-Control-Allow-Methods', 'GET')
     return response
@@ -53,7 +53,7 @@ def home():
 def semantic_search():
     if request.method == 'OPTIONS':
         response = jsonify()
-        response.headers.add('Access-Control-Allow-Origin', 'https://newsic-frontend.vercel.app')
+        response.headers.add('Access-Control-Allow-Origin', '*')
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
         response.headers.add('Access-Control-Allow-Methods', 'POST')
         return response
