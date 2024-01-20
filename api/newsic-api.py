@@ -37,17 +37,16 @@ def get_data():
 def headlines():
     headlines = db.articles.find({}, {"art_title": 1, "_id": 0})
     headlines_list = [article["art_title"] for article in headlines]
-    return jsonify({"headlines": headlines_list})
+    return jsonify(response=headlines_list)
 
 @app.route("/", methods=['GET'])
 def home():
-    return jsonify({"message": "Welcome to Newsic"})
+    return jsonify(message="Welcome to Newsic")
 
 @app.route('/semantic-search', methods=['POST'])
 def semantic_search():
     data = request.get_json()
     search = data.get('search', '')
-    print (search)
 
     response2 = client.embeddings.create(
       input = search,
@@ -66,7 +65,7 @@ def semantic_search():
         article = records.find_one({'art_title': title}, {'_id': 0})
         if article:
             articles.append(article)
-    return jsonify(articles)
+    return jsonify(response=articles)
 
 @app.after_request
 def cors_headers(response):
