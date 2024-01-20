@@ -30,6 +30,7 @@ def get_data():
     articles = db.articles.find({}, {"_id": 0})
     articles_list = list(articles)
     response = jsonify({'response': articles_list})
+    response.headers['Content-Type'] = 'application/json'
     return response
 
 @app.route('/api/data/headlines' ,methods=['GET'])
