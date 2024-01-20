@@ -29,13 +29,15 @@ records = db.articles
 def get_data():
     if request.method == 'OPTIONS':
         response = jsonify()
-        response.headers.add('Access-Control-Allow-Origin', 'https://newsic-frontend.vercel.app')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.add('Access-Control-Allow-Methods', 'GET')
-        return response
-    articles = db.articles.find({}, {"_id": 0})
-    articles_list = list(articles)
-    return jsonify(articles_list)
+    else:
+        articles = db.articles.find({}, {"_id": 0})
+        articles_list = list(articles)
+        response = jsonify(articles_list)
+    
+    response.headers.add('Access-Control-Allow-Origin', 'https://newsic-frontend.vercel.app')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Methods', 'GET')
+    return response
 
 @app.route('/api/data/headlines' ,methods=['GET'])
 def headlines():
