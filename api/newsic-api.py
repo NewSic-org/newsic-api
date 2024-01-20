@@ -25,8 +25,14 @@ client_db = MongoClient(MONGO_DB_URI)
 db = client_db.get_database('newsic')
 records = db.articles
 
-@app.route('/api/data', methods=['GET'])
+@app.route('/api/data', methods=['GET', 'OPTIONS'])
 def get_data():
+    if request.method == 'OPTIONS':
+        response = jsonify()
+        response.headers.add('Access-Control-Allow-Origin', 'https://newsic-frontend.vercel.app')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Methods', 'GET')
+        return response
     articles = db.articles.find({}, {"_id": 0})
     articles_list = list(articles)
     return jsonify(articles_list)
@@ -41,8 +47,14 @@ def headlines():
 def home():
     return "Connection Succesful"
 
-@app.route('/semantic-search', methods=['POST'])
+@app.route('/semantic-search', methods=['POST', 'OPTIONS'])
 def semantic_search():
+    if request.method == 'OPTIONS':
+        response = jsonify()
+        response.headers.add('Access-Control-Allow-Origin', 'https://newsic-frontend.vercel.app')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Methods', 'POST')
+        return response
     data = request.get_json()
     search = data.get('search', '')
     print (search)
@@ -68,19 +80,9 @@ def semantic_search():
 
 @app.route('/semantic-search', methods=['OPTIONS'])
 def handle_preflight():
-    response = jsonify()
-    response.headers.add('Access-Control-Allow-Origin', 'https://newsic-frontend.vercel.app')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-    response.headers.add('Access-Control-Allow-Methods', 'POST')
-    return response
+    
 
 
-@app.route('/api/data', methods=['OPTIONS'])
-def data_preflight():
-    response = jsonify()
-    response.headers.add('Access-Control-Allow-Origin', 'https://newsic-frontend.vercel.app')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-    response.headers.add('Access-Control-Allow-Methods', 'GET')
-    return response
+
 if __name__ == '__main__':
     app.run()
