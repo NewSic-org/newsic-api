@@ -74,5 +74,13 @@ def handle_preflight():
     response.headers.add('Access-Control-Allow-Methods', 'POST')
     return response
 
+
+@app.route('/api/data', methods=['OPTIONS'])
+def data_preflight():
+    response = jsonify()
+    response.headers.add('Access-Control-Allow-Origin', 'https://newsic-frontend.vercel.app')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Methods', 'GET')
+    return response
 if __name__ == '__main__':
     app.run()
