@@ -80,5 +80,10 @@ def semantic_search():
             articles.append(article)
     return jsonify(articles)
 
+@app.after_request
+def cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
+
 if __name__ == '__main__':
     app.run()
