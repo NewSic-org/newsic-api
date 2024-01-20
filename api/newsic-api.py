@@ -25,18 +25,11 @@ client_db = MongoClient(MONGO_DB_URI)
 db = client_db.get_database('newsic')
 records = db.articles
 
-@app.route('/api/data', methods=['GET', 'OPTIONS'])
+@app.route('/api/data', methods=['GET'])
 def get_data():
-    if request.method == 'OPTIONS':
-        response = jsonify()
-    else:
-        articles = db.articles.find({}, {"_id": 0})
-        articles_list = list(articles)
-        response = jsonify(articles_list)
-    
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-    response.headers.add('Access-Control-Allow-Methods', 'GET')
+    articles = db.articles.find({}, {"_id": 0})
+    articles_list = list(articles)
+    response = jsonify(articles_list)
     return response
 
 @app.route('/api/data/headlines' ,methods=['GET'])
@@ -49,14 +42,8 @@ def headlines():
 def home():
     return "Connection Succesful"
 
-@app.route('/semantic-search', methods=['POST', 'OPTIONS'])
+@app.route('/semantic-search', methods=['POST'])
 def semantic_search():
-    if request.method == 'OPTIONS':
-        response = jsonify()
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.add('Access-Control-Allow-Methods', 'POST')
-        return response
     data = request.get_json()
     search = data.get('search', '')
     print (search)
