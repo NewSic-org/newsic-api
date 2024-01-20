@@ -40,7 +40,7 @@ def headlines():
 
 @app.route("/", methods=['GET'])
 def home():
-    jsonify({"message": "Welcome to Newsic"})
+    return jsonify({"message": "Welcome to Newsic"})
 
 @app.route('/semantic-search', methods=['POST'])
 def semantic_search():
