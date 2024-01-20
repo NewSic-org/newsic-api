@@ -78,11 +78,5 @@ def semantic_search():
             articles.append(article)
     return jsonify(articles)
 
-@app.route('/semantic-search', methods=['OPTIONS'])
-def handle_preflight():
-    
-
-
-
 if __name__ == '__main__':
     app.run()
