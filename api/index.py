@@ -1,17 +1,18 @@
-import pathlib
-from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 import os
 from flask_cors import CORS
 from pymongo import MongoClient
 from pinecone import Pinecone
 from openai import OpenAI
+# import pathlib
+# from dotenv import load_dotenv
+
+
+# env_path = pathlib.Path('..') / '.local.env'
+# load_dotenv(dotenv_path=env_path)
 
 app = Flask(__name__)
 CORS(app)
-
-env_path = pathlib.Path('..') / '.local.env'
-load_dotenv(dotenv_path=env_path)
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 MONGO_DB_URI = os.getenv('MONGO_DB_URI')
@@ -67,10 +68,47 @@ def semantic_search():
             articles.append(article)
     return jsonify(response=articles)
 
-@app.after_request
-def cors_headers(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    return response
+@app.route('/regenerate', methods=['POST'])
+def regenerate():
+    data = request.get_json()
+    summary = data.get('summary', '')
+    title = data.get('title', '')
+    regenerate = regenerate_content(summary, title)
+    return regenerate
+
+def regenerate_content(summary, title):
+    response = client.chat.completions.create(
+    model="ft:gpt-3.5-turbo-1106:personal::8eovJ1Vq",
+    messages=[
+        {"role": "system", "content": "You are a Bollywood lyricist and will generate Bollywood songs lyrics and title based on the user input, which is news content of an article. The song lyrics need to be mostly in Hindi and might include English in between. Do not include the translation to these lyrics."},
+        {"role": "user", "content": f"{summary}"}
+    ],
+    temperature=1,
+    max_tokens=256,
+    top_p=1,
+    frequency_penalty=0,
+    presence_penalty=0
+    )
+    content = response.choices[0].message.content
+    song_title_start = content.find("Song Title: '") + len("Song Title: '")
+    song_title_end = content.find("'", song_title_start)
+    song_title = content[song_title_start:song_title_end]
+    records.update_one(
+            {'art_title': title},
+            {
+                '$set': {
+                    'song': content,
+                    'song_title': song_title
+                }
+            }
+        )
+    return jsonify({'title': song_title, 'generatedContent': content})
+  
+
+# @app.after_request
+# def cors_headers(response):
+#     response.headers["Access-Control-Allow-Origin"] = "*"
+#     return response
 
 if __name__ == '__main__':
     app.run()
