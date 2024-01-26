@@ -28,6 +28,8 @@ records = db.articles
 
 @app.before_request
 def check_token():
+    if request.method == 'OPTIONS':
+        return handle_preflight()
     authorization_header = request.headers.get('Authorization')
     if not authorization_header:
         return jsonify({'error': 'Missing Authorization header'}), 401
@@ -44,7 +46,12 @@ def verify_google_oauth_token(token):
         return True
     else:
         return False
-    
+
+def handle_preflight():
+    response = jsonify({'message': 'Preflight request accepted'})
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type'
+    return response
 
 @app.route('/api/data', methods=['GET'])
 def get_data():
