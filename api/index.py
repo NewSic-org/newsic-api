@@ -4,9 +4,9 @@ from flask_cors import CORS
 from pymongo import MongoClient
 from pinecone import Pinecone
 from openai import OpenAI
+import requests
 # import pathlib
 # from dotenv import load_dotenv
-
 
 # env_path = pathlib.Path('..') / '.local.env'
 # load_dotenv(dotenv_path=env_path)
@@ -25,6 +25,26 @@ index = pc.Index("newsic")
 client_db = MongoClient(MONGO_DB_URI)
 db = client_db.get_database('newsic')
 records = db.articles
+
+@app.before_request
+def check_token():
+    authorization_header = request.headers.get('Authorization')
+    if not authorization_header:
+        return jsonify({'error': 'Missing Authorization header'}), 401
+
+    token = authorization_header.split('Bearer ')[-1].strip()
+
+    if not verify_google_oauth_token(token):
+        return jsonify({'error': 'Invalid Google OAuth token'}), 401
+
+
+def verify_google_oauth_token(token):
+    google_response = requests.get(f'https://www.googleapis.com/oauth2/v3/tokeninfo?access_token={token}')
+    if google_response.status_code == 200:
+        return True
+    else:
+        return False
+    
 
 @app.route('/api/data', methods=['GET'])
 def get_data():
@@ -109,6 +129,8 @@ def regenerate_content(summary, title):
 # def cors_headers(response):
 #     response.headers["Access-Control-Allow-Origin"] = "*"
 #     return response
+
+
 
 if __name__ == '__main__':
     app.run()
